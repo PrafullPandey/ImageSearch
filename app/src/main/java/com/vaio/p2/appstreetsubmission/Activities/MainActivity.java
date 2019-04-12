@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         gridLayoutManager = new GridLayoutManager(this ,columnCount);
         recyclerViewImage.setHasFixedSize(true);
         recyclerViewImage.setLayoutManager(gridLayoutManager);
-        imageAdapter = new ImageAdapter(imageURL ,this);
+        imageAdapter = new ImageAdapter(imageURL ,this,columnCount);
         recyclerViewImage.setAdapter(imageAdapter);
     }
 
@@ -100,8 +100,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
                 if(response.body()!=null) {
+                    imageURL.clear();
                     for(int i=0 ;i<response.body().getResults().size();i++){
-                        imageURL.add(response.body().getResults().get(i).getUrls().getRaw());
+                        imageURL.add(response.body().getResults().get(i).getUrls().getThumb());
                     }
                     imageAdapter.addItem(imageURL);
                 }
@@ -130,8 +131,15 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.column2) {
+            columnCount =2 ;
+            initializeRecyclerView();
+        }else if(id ==R.id.column3){
+            columnCount = 3;
+            initializeRecyclerView();
+        }else if (id == R.id.column4){
+            columnCount =4;
+            initializeRecyclerView();
         }
 
         return super.onOptionsItemSelected(item);

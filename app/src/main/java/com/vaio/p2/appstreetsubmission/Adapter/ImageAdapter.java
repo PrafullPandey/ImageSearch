@@ -20,10 +20,12 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
 
     ArrayList<String> urls ;
     Context context ;
+    int column ;
 
-    public ImageAdapter(ArrayList<String> urls, Context context) {
+    public ImageAdapter(ArrayList<String> urls, Context context, int column) {
         this.urls = urls;
         this.context = context;
+        this.column = column;
     }
 
     @Override
@@ -37,12 +39,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     @Override
     public void onBindViewHolder(ImageViewHolder holder, int position) {
         String url = urls.get(position);
+        holder.image.setImageResource(0);
         holder.setImage(context ,url);
     }
 
     @Override
     public int getItemCount() {
-        return urls!=null?urls.size():0;
+        return urls!=null?urls.size()-urls.size()%column:0;
     }
 
     public void addItem(ArrayList<String> urls){
