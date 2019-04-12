@@ -1,9 +1,10 @@
-package com.vaio.p2.appstreetsubmission;
+package com.vaio.p2.appstreetsubmission.Activities;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import com.vaio.p2.appstreetsubmission.Network.Response.SearchResponse;
 import com.vaio.p2.appstreetsubmission.Network.RestAPI;
+import com.vaio.p2.appstreetsubmission.R;
 import com.vaio.p2.appstreetsubmission.Utilities.Constants;
 
 import retrofit2.Call;
@@ -23,7 +25,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+    private int page =1;
+
     private TextView result ;
+    private SearchView searchView ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,18 +37,40 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        initializeView();
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                getData();
+
             }
         });
 
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                getData(s);
+                return false ;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
+
+    }
+
+    private void initializeView() {
+        searchView = (SearchView)findViewById(R.id.searchImage);
         result = (TextView)findViewById(R.id.results);
-        RestAPI.getAppService().getSearchResult(Constants.ACCESS_KEY ,"office" ,1).enqueue(new Callback<SearchResponse>() {
+    }
+
+    private void getData(String query) {
+        RestAPI.getAppService().getSearchResult(Constants.ACCESS_KEY ,query ,page).enqueue(new Callback<SearchResponse>() {
             @Override
             public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
                 if(response.body()!=null) {
@@ -57,12 +84,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "onFailure: "+t.getMessage());
             }
         });
-
-    }
-
-    private void getData() {
-
-
     }
 
     @Override
