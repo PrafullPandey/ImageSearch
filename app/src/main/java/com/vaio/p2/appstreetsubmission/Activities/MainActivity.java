@@ -1,7 +1,9 @@
 package com.vaio.p2.appstreetsubmission.Activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -18,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.vaio.p2.appstreetsubmission.Adapter.ImageAdapter;
 import com.vaio.p2.appstreetsubmission.Network.Response.SearchResponse;
 import com.vaio.p2.appstreetsubmission.Network.RestAPI;
@@ -176,7 +179,15 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
 
     @Override
     public void growUpOnClicking(String url, int position , ImageView imageView) {
-//        Toast.makeText(this , position+" "+url ,Toast.LENGTH_SHORT).show();
+
+        //to store the list retrieved from response
+        SharedPreferences appSharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext());
+        SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(imageURL);
+        prefsEditor.putString("URLLIST", json);
+        prefsEditor.commit();
 
         Intent intent = new Intent(this, EnlargedImageActivity.class);
         // Pass data object in the bundle and populate details activity.
@@ -184,5 +195,6 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(this, (View)imageView, "profile");
         startActivity(intent, options.toBundle());
+
     }
 }
