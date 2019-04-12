@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.vaio.p2.appstreetsubmission.Adapter.ImageAdapter;
 import com.vaio.p2.appstreetsubmission.Network.Response.SearchResponse;
 import com.vaio.p2.appstreetsubmission.Network.RestAPI;
 import com.vaio.p2.appstreetsubmission.R;
@@ -29,10 +32,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private int page =1;
-
-    private TextView result ;
-    private SearchView searchView ;
+    int columnCount = 3 ;
     private ArrayList<String> imageURL ;
+
+    private SearchView searchView ;
+    private RecyclerView recyclerViewImage ;
+    private GridLayoutManager gridLayoutManager ;
+    private ImageAdapter imageAdapter ;
 
 
     @Override
@@ -44,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         //initialize the view and the objects
         initialize();
+        initializeRecyclerView();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -72,9 +79,19 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void initializeRecyclerView() {
+        recyclerViewImage = (RecyclerView)findViewById(R.id.recyclerViewImage);
+        gridLayoutManager = new GridLayoutManager(this ,columnCount);
+        recyclerViewImage.setHasFixedSize(true);
+        recyclerViewImage.setLayoutManager(gridLayoutManager);
+        imageAdapter = new ImageAdapter(imageURL ,this);
+        recyclerViewImage.setAdapter(imageAdapter);
+    }
+
     private void initialize() {
         searchView = (SearchView)findViewById(R.id.searchImage);
-        result = (TextView)findViewById(R.id.results);
+        recyclerViewImage = (RecyclerView)findViewById(R.id.recyclerViewImage);
+
         imageURL = new ArrayList<>();
     }
 
@@ -86,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                     for(int i=0 ;i<response.body().getResults().size();i++){
                         imageURL.add(response.body().getResults().get(i).getUrls().getRaw());
                     }
-                    result.setText(imageURL.toString());
+                    imageAdapter.addItem(imageURL);
                 }
             }
 
