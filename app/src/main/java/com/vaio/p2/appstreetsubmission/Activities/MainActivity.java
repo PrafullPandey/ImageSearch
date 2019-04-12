@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int page =1;
     int columnCount = 3 ;
+    String query ;
     private ArrayList<String> imageURL ;
 
     private SearchView searchView ;
@@ -65,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
+                page=1;
+                query=s;
                 getData(s);
                 return false ;
             }
@@ -72,6 +75,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String s) {
                 return false;
+            }
+        });
+
+        recyclerViewImage.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if(!recyclerView.canScrollVertically(1)){
+                    page++;
+                    getData(query);
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
             }
         });
 
@@ -100,7 +119,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
                 if(response.body()!=null) {
-                    imageURL.clear();
+                    if(page==1)
+                        imageURL.clear();
                     for(int i=0 ;i<response.body().getResults().size();i++){
                         imageURL.add(response.body().getResults().get(i).getUrls().getThumb());
                     }
