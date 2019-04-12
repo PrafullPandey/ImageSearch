@@ -33,19 +33,18 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements ImageAdapter.GrowUpOnClick{
+public class MainActivity extends AppCompatActivity implements ImageAdapter.GrowUpOnClick {
 
     private static final String TAG = "MainActivity";
-
-    private int page =1;
-    int columnCount = 2 ;
+    int columnCount = 2;
     String query = "apple";
-    private ArrayList<String> imageURL ;
+    private int page = 1;
+    private ArrayList<String> imageURL;
 
-    private SearchView searchView ;
-    private RecyclerView recyclerViewImage ;
-    private GridLayoutManager gridLayoutManager ;
-    private ImageAdapter imageAdapter ;
+    private SearchView searchView;
+    private RecyclerView recyclerViewImage;
+    private GridLayoutManager gridLayoutManager;
+    private ImageAdapter imageAdapter;
 
 
     @Override
@@ -75,10 +74,10 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
-                page=1;
-                query=s;
+                page = 1;
+                query = s;
                 getData(s);
-                return false ;
+                return false;
             }
 
             @Override
@@ -91,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if(!recyclerView.canScrollVertically(1)){
+                if (!recyclerView.canScrollVertically(1)) {
                     page++;
                     getData(query);
                 }
@@ -104,33 +103,32 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
         });
 
 
-
     }
 
     private void initializeRecyclerView() {
-        recyclerViewImage = (RecyclerView)findViewById(R.id.recyclerViewImage);
-        gridLayoutManager = new GridLayoutManager(this ,columnCount);
+        recyclerViewImage = (RecyclerView) findViewById(R.id.recyclerViewImage);
+        gridLayoutManager = new GridLayoutManager(this, columnCount);
         recyclerViewImage.setHasFixedSize(true);
         recyclerViewImage.setLayoutManager(gridLayoutManager);
-        imageAdapter = new ImageAdapter(imageURL ,this,columnCount ,this);
+        imageAdapter = new ImageAdapter(imageURL, this, columnCount, this);
         recyclerViewImage.setAdapter(imageAdapter);
     }
 
     private void initialize() {
-        searchView = (SearchView)findViewById(R.id.searchImage);
-        recyclerViewImage = (RecyclerView)findViewById(R.id.recyclerViewImage);
+        searchView = (SearchView) findViewById(R.id.searchImage);
+        recyclerViewImage = (RecyclerView) findViewById(R.id.recyclerViewImage);
 
         imageURL = new ArrayList<>();
     }
 
     private void getData(String query) {
-        RestAPI.getAppService().getSearchResult(Constants.ACCESS_KEY ,query ,page).enqueue(new Callback<SearchResponse>() {
+        RestAPI.getAppService().getSearchResult(Constants.ACCESS_KEY, query, page).enqueue(new Callback<SearchResponse>() {
             @Override
             public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
-                if(response.body()!=null) {
-                    if(page==1)
+                if (response.body() != null) {
+                    if (page == 1)
                         imageURL.clear();
-                    for(int i=0 ;i<response.body().getResults().size();i++){
+                    for (int i = 0; i < response.body().getResults().size(); i++) {
                         imageURL.add(response.body().getResults().get(i).getUrls().getThumb());
                     }
                     imageAdapter.addItem(imageURL);
@@ -139,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
 
             @Override
             public void onFailure(Call<SearchResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: "+t.getMessage());
+                Log.e(TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -161,15 +159,15 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.column2) {
-            columnCount =2 ;
+            columnCount = 2;
             initializeRecyclerView();
-        }else if(id ==R.id.column3){
+        } else if (id == R.id.column3) {
             columnCount = 3;
             initializeRecyclerView();
-        }else if (id == R.id.column4){
-            columnCount =4;
+        } else if (id == R.id.column4) {
+            columnCount = 4;
             initializeRecyclerView();
-        }else if(id==android.R.id.home) {
+        } else if (id == android.R.id.home) {
             supportFinishAfterTransition();
             return true;
         }
@@ -178,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
     }
 
     @Override
-    public void growUpOnClicking(String url, int position , ImageView imageView) {
+    public void growUpOnClicking(String url, int position, ImageView imageView) {
 
         //to store the list retrieved from response
         SharedPreferences appSharedPrefs = PreferenceManager
@@ -191,9 +189,9 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
 
         Intent intent = new Intent(this, EnlargedImageActivity.class);
         // Pass data object in the bundle and populate details activity.
-        intent.putExtra("URL", url);
+        intent.putExtra("POSITION", position);
         ActivityOptionsCompat options = ActivityOptionsCompat.
-                makeSceneTransitionAnimation(this, (View)imageView, "profile");
+                makeSceneTransitionAnimation(this, (View) imageView, "profile");
         startActivity(intent, options.toBundle());
 
     }
