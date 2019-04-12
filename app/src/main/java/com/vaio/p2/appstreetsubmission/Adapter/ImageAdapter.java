@@ -18,14 +18,21 @@ import java.util.ArrayList;
 
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
 
+    public interface GrowUpOnClick{
+        public void growUpOnClicking(String url , int position);
+    }
+
     ArrayList<String> urls ;
     Context context ;
     int column ;
+    GrowUpOnClick growUpOnClick ;
 
-    public ImageAdapter(ArrayList<String> urls, Context context, int column) {
+
+    public ImageAdapter(ArrayList<String> urls, Context context, int column , GrowUpOnClick growUpOnClick) {
         this.urls = urls;
         this.context = context;
         this.column = column;
+        this.growUpOnClick = growUpOnClick;
     }
 
     @Override
@@ -62,8 +69,14 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
             image = (ImageView) itemView.findViewById(R.id.image);
         }
 
-        public void setImage(Context context, String url) {
+        public void setImage(Context context, final String url) {
             Picasso.with(context).load(url).into(image);
+            image.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    growUpOnClick.growUpOnClicking(url,getAdapterPosition());
+                }
+            });
         }
     }
 }

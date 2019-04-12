@@ -27,13 +27,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ImageAdapter.GrowUpOnClick{
 
     private static final String TAG = "MainActivity";
 
     private int page =1;
-    int columnCount = 3 ;
-    String query ;
+    int columnCount = 2 ;
+    String query = "apple";
     private ArrayList<String> imageURL ;
 
     private SearchView searchView ;
@@ -52,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
         //initialize the view and the objects
         initialize();
         initializeRecyclerView();
+
+        //testing
+        getData(query);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -103,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         gridLayoutManager = new GridLayoutManager(this ,columnCount);
         recyclerViewImage.setHasFixedSize(true);
         recyclerViewImage.setLayoutManager(gridLayoutManager);
-        imageAdapter = new ImageAdapter(imageURL ,this,columnCount);
+        imageAdapter = new ImageAdapter(imageURL ,this,columnCount ,this);
         recyclerViewImage.setAdapter(imageAdapter);
     }
 
@@ -163,5 +166,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void growUpOnClicking(String url, int position) {
+        Toast.makeText(this , position+" "+url ,Toast.LENGTH_SHORT).show();
     }
 }
