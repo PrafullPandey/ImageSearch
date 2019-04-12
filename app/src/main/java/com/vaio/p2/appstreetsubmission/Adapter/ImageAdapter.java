@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
 
     public interface GrowUpOnClick{
-        public void growUpOnClicking(String url , int position);
+        public void growUpOnClicking(String url , int position ,ImageView imageView);
     }
 
     ArrayList<String> urls ;
@@ -74,7 +74,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
             image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    growUpOnClick.growUpOnClicking(url,getAdapterPosition());
+                    growUpOnClick.growUpOnClicking(url,getAdapterPosition(),image);
                 }
             });
         }
