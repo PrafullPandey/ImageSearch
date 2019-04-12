@@ -11,11 +11,14 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.vaio.p2.appstreetsubmission.Network.Response.SearchResponse;
 import com.vaio.p2.appstreetsubmission.Network.RestAPI;
 import com.vaio.p2.appstreetsubmission.R;
 import com.vaio.p2.appstreetsubmission.Utilities.Constants;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView result ;
     private SearchView searchView ;
+    private ArrayList<String> imageURL ;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        initializeView();
+        //initialize the view and the objects
+        initialize();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -62,11 +68,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+
     }
 
-    private void initializeView() {
+    private void initialize() {
         searchView = (SearchView)findViewById(R.id.searchImage);
         result = (TextView)findViewById(R.id.results);
+        imageURL = new ArrayList<>();
     }
 
     private void getData(String query) {
@@ -74,14 +83,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
                 if(response.body()!=null) {
-                    Log.d(TAG, "onResponse: " + response.body().toString());
-                    result.setText(response.body().toString());
+                    for(int i=0 ;i<response.body().getResults().size();i++){
+                        imageURL.add(response.body().getResults().get(i).getUrls().getRaw());
+                    }
+                    result.setText(imageURL.toString());
                 }
             }
 
             @Override
             public void onFailure(Call<SearchResponse> call, Throwable t) {
                 Log.e(TAG, "onFailure: "+t.getMessage());
+                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
