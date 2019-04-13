@@ -23,6 +23,7 @@ public class EnlargedImageActivity extends AppCompatActivity {
     private ArrayList<String> urlList ;
     private ViewPager viewPager ;
     private ImagePagerAdapter imagePagerAdapter ;
+    public static int currentItem = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +56,13 @@ public class EnlargedImageActivity extends AppCompatActivity {
         );
 
 
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        currentItem=viewPager.getCurrentItem();
 
     }
 

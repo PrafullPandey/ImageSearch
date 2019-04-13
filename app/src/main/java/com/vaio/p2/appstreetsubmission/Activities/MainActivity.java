@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -28,6 +29,8 @@ import com.vaio.p2.appstreetsubmission.R;
 import com.vaio.p2.appstreetsubmission.Utilities.Constants;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
     private RecyclerView recyclerViewImage;
     private GridLayoutManager gridLayoutManager;
     private ImageAdapter imageAdapter;
+    private static int current = -1;
 
 
     @Override
@@ -102,7 +106,40 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
             }
         });
 
+        if (savedInstanceState != null) {
+            current = savedInstanceState.getInt("VIEW_POSITION");
+        }else{
+            current =0 ;
+        }
 
+
+        setExitSharedElementCallback(new SharedElementCallback() {
+            @Override
+            public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                super.onMapSharedElements(names, sharedElements);
+                if (sharedElements.isEmpty()) {
+                    View view = recyclerViewImage.getLayoutManager().findViewByPosition(current);
+                    if (view != null) {
+                        sharedElements.put(names.get(0), view);
+                    }
+                }
+            }
+        });
+
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("VIEW_POSITION", current);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: ");
+        
     }
 
     private void initializeRecyclerView() {
@@ -112,6 +149,10 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
         recyclerViewImage.setLayoutManager(gridLayoutManager);
         imageAdapter = new ImageAdapter(imageURL, this, columnCount, this);
         recyclerViewImage.setAdapter(imageAdapter);
+
+        if(EnlargedImageActivity.currentItem!=-1){
+            recyclerViewImage.getLayoutManager().scrollToPosition(EnlargedImageActivity.currentItem);
+        }
     }
 
     private void initialize() {
@@ -177,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
 
     @Override
     public void growUpOnClicking(String url, int position, ImageView imageView) {
+        current = position ;
 
         //to store the list retrieved from response
         SharedPreferences appSharedPrefs = PreferenceManager

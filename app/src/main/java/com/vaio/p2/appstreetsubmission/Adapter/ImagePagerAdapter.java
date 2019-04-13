@@ -45,7 +45,7 @@ public class ImagePagerAdapter  extends PagerAdapter {
         imageView.setLayoutParams(params);
         imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);*/
 
-        Picasso.with(context).load(urls.get(position)).into(imageView);
+        Picasso.with(context).load(urls.get(position)).placeholder(context.getDrawable(R.drawable.thumbnail)).into(imageView);
         if(imageView.getParent()!=null){
             ((ViewGroup)imageView.getParent()).removeView(imageView);
         }

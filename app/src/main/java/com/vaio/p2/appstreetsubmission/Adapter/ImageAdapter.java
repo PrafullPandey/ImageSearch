@@ -64,7 +64,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     }
 
     public void addItem(ArrayList<String> urls){
-        this.urls.addAll(urls);
+        this.urls=urls;
         notifyDataSetChanged();
     }
 
@@ -78,7 +78,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
         }
 
         public void setImage(Context context, final String url) {
-            Picasso.with(context).load(url).into(image);
+            Picasso.with(context).load(url).placeholder(context.getDrawable(R.drawable.thumbnail)).into(image);
             image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
