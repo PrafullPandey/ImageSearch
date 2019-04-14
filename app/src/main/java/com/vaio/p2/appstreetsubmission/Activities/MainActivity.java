@@ -167,26 +167,34 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
     }
 
     private void getData(final String query) {
-        RestAPI.getAppService().getSearchResult(Constants.ACCESS_KEY, query, page).enqueue(new Callback<SearchResponse>() {
-            @Override
-            public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
-                if (response.body() != null) {
-                    if (page == 1)
-                        imageURL.clear();
-                    for (int i = 0; i < response.body().getResults().size(); i++) {
-                        imageURL.add(response.body().getResults().get(i).getUrls().getThumb());
-                        db.createImage(query,response.body().getResults().get(i).getUrls().getThumb());
+        if(db.getAllImages(query)!=null&&db.getAllImages(query).size()>0&&page==1){
+            imageAdapter.addItem(db.getAllImages(query));
+            page = db.getAllImages(query).size()/10 ;
+        }else{
+            RestAPI.getAppService().getSearchResult(Constants.ACCESS_KEY, query, page).enqueue(new Callback<SearchResponse>() {
+                @Override
+                public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
+                    if (response.body() != null) {
+                        if (page == 1)
+                            imageURL.clear();
+                        for (int i = 0; i < response.body().getResults().size(); i++) {
+                            imageURL.add(response.body().getResults().get(i).getUrls().getThumb());
+                            db.createImage(query,response.body().getResults().get(i).getUrls().getThumb());
+                        }
+                        imageAdapter.addItem(imageURL);
                     }
-                    imageAdapter.addItem(imageURL);
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SearchResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: " + t.getMessage());
-                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<SearchResponse> call, Throwable t) {
+                    if(page!=1)
+                        page--;
+                    Log.e(TAG, "onFailure: " + t.getMessage());
+                    Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
     }
 
     @Override
