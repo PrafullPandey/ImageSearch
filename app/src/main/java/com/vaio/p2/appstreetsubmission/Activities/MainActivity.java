@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
 
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
         initializeRecyclerView();
 
         //testing
-        getData(query);
+//        getData(query);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
+                imageURL.clear();
                 s=s.toLowerCase();
                 page = 1;
                 query = s;
@@ -142,22 +144,6 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
         }else{
             current =0 ;
         }
-
-
-        setExitSharedElementCallback(new SharedElementCallback() {
-            @Override
-            public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-                super.onMapSharedElements(names, sharedElements);
-                if (sharedElements.isEmpty()) {
-                    View view = recyclerViewImage.getLayoutManager().findViewByPosition(current);
-                    if (view != null) {
-                        sharedElements.put(names.get(0), view);
-                    }
-                }
-            }
-        });
-
-
     }
 
     @Override
@@ -282,7 +268,6 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
     @Override
     public void growUpOnClicking(String url, int position, ImageView imageView) {
         current = position ;
-
         //to store the list retrieved from response
         SharedPreferences appSharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this.getApplicationContext());
