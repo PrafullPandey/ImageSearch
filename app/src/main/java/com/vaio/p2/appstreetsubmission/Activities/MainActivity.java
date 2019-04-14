@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.vaio.p2.appstreetsubmission.Adapter.ImageAdapter;
+import com.vaio.p2.appstreetsubmission.Database.DatabaseHelper;
 import com.vaio.p2.appstreetsubmission.Network.Response.SearchResponse;
 import com.vaio.p2.appstreetsubmission.Network.RestAPI;
 import com.vaio.p2.appstreetsubmission.R;
@@ -42,13 +43,15 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
     int columnCount = 2;
     String query = "apple";
     private int page = 1;
+    private static int current = -1;
     private ArrayList<String> imageURL;
 
     private SearchView searchView;
     private RecyclerView recyclerViewImage;
     private GridLayoutManager gridLayoutManager;
     private ImageAdapter imageAdapter;
-    private static int current = -1;
+    private DatabaseHelper db ;
+
 
 
     @Override
@@ -158,11 +161,12 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
     private void initialize() {
         searchView = (SearchView) findViewById(R.id.searchImage);
         recyclerViewImage = (RecyclerView) findViewById(R.id.recyclerViewImage);
+        db = new DatabaseHelper(getApplicationContext());
 
         imageURL = new ArrayList<>();
     }
 
-    private void getData(String query) {
+    private void getData(final String query) {
         RestAPI.getAppService().getSearchResult(Constants.ACCESS_KEY, query, page).enqueue(new Callback<SearchResponse>() {
             @Override
             public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
@@ -171,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
                         imageURL.clear();
                     for (int i = 0; i < response.body().getResults().size(); i++) {
                         imageURL.add(response.body().getResults().get(i).getUrls().getThumb());
+                        db.createImage(query,response.body().getResults().get(i).getUrls().getThumb());
                     }
                     imageAdapter.addItem(imageURL);
                 }
