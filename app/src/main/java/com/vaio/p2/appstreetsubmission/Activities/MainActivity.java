@@ -1,7 +1,9 @@
 package com.vaio.p2.appstreetsubmission.Activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +32,7 @@ import com.vaio.p2.appstreetsubmission.Network.RestAPI;
 import com.vaio.p2.appstreetsubmission.R;
 import com.vaio.p2.appstreetsubmission.Utilities.Constants;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +48,12 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
     String query = "apple";
     private int page = 1;
     private static int current = -1;
+    private int per_page = 40 ;
     private ArrayList<String> imageURL;
 
     private SearchView searchView;
+    private ProgressBar progressBar ;
+    private TextView noResulttextView ;
     private RecyclerView recyclerViewImage;
     private GridLayoutManager gridLayoutManager;
     private ImageAdapter imageAdapter;
@@ -81,9 +88,24 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
+                s=s.toLowerCase();
                 page = 1;
                 query = s;
-                getData(s);
+                if(isNetworkConnected()) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    getData(s);
+                }
+                else {
+                    if (db.getAllImages(query) != null && db.getAllImages(query).size() > 0 && page == 1) {
+                        noResulttextView.setVisibility(View.GONE);
+                        imageURL = db.getAllImages(query);
+                        imageAdapter.addItem(imageURL);
+                        page = imageURL.size() / 10;
+                    }else{
+                        noResulttextView.setVisibility(View.VISIBLE);
+                        imageAdapter.addItem(null);
+                    }
+                }
                 return false;
             }
 
@@ -98,8 +120,14 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (!recyclerView.canScrollVertically(1)) {
-                    page++;
-                    getData(query);
+                    if(isNetworkConnected()){
+                        progressBar.setVisibility(View.VISIBLE);
+                        page++;
+                        getData(query);
+                    }else{
+                        Toast.makeText(getApplicationContext() , "Not Connected to Network" , Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             }
 
@@ -160,7 +188,9 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
 
     private void initialize() {
         searchView = (SearchView) findViewById(R.id.searchImage);
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
         recyclerViewImage = (RecyclerView) findViewById(R.id.recyclerViewImage);
+        noResulttextView = (TextView)findViewById(R.id.noResults);
         db = new DatabaseHelper(getApplicationContext());
 
         imageURL = new ArrayList<>();
@@ -168,13 +198,23 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
 
     private void getData(final String query) {
         if(db.getAllImages(query)!=null&&db.getAllImages(query).size()>0&&page==1){
-            imageAdapter.addItem(db.getAllImages(query));
-            page = db.getAllImages(query).size()/10 ;
+            noResulttextView.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            imageURL.addAll(db.getAllImages(query));
+            imageAdapter.addItem(imageURL);
+            page = imageURL.size()/10 ;
         }else{
-            RestAPI.getAppService().getSearchResult(Constants.ACCESS_KEY, query, page).enqueue(new Callback<SearchResponse>() {
+            if(page!=1)
+                per_page=10;
+            else{
+                per_page=40;
+            }
+            RestAPI.getAppService().getSearchResult(Constants.ACCESS_KEY, query, page ,per_page).enqueue(new Callback<SearchResponse>() {
                 @Override
                 public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
                     if (response.body() != null) {
+                        progressBar.setVisibility(View.GONE);
+                        noResulttextView.setVisibility(View.GONE);
                         if (page == 1)
                             imageURL.clear();
                         for (int i = 0; i < response.body().getResults().size(); i++) {
@@ -187,8 +227,12 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
 
                 @Override
                 public void onFailure(Call<SearchResponse> call, Throwable t) {
-                    if(page!=1)
+                    if(page==1){
+                        noResulttextView.setVisibility(View.VISIBLE);
+                    }else{
                         page--;
+                    }
+                    progressBar.setVisibility(View.GONE);
                     Log.e(TAG, "onFailure: " + t.getMessage());
                     Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -227,6 +271,12 @@ public class MainActivity extends AppCompatActivity implements ImageAdapter.Grow
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
     }
 
     @Override

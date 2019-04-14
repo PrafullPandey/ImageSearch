@@ -7,4 +7,10 @@
     <color name="grey">#d3d3d3</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
+
+    <color name="gray_800">#424242</color>
+    <color name="gray_700">#616161</color>
+    <color name="gray_600">#757575</color>
+    <color name="gray_500">#9E9E9E</color>
+
 </resources>

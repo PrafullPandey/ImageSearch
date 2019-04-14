@@ -1,6 +1,7 @@
 package com.vaio.p2.appstreetsubmission.Adapter;
 
 import android.content.Context;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,10 +72,12 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     public class ImageViewHolder extends RecyclerView.ViewHolder{
 
         ImageView image;
+        ConstraintLayout parent ;
 
         public ImageViewHolder(View itemView) {
             super(itemView);
             image = (ImageView) itemView.findViewById(R.id.image);
+            parent = (ConstraintLayout)itemView.findViewById(R.id.parent);
         }
 
         public void setImage(Context context, final String url) {
